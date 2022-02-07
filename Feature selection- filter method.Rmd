@@ -1,0 +1,152 @@
+---
+title: "Feature Selection"
+author: "Karen Mwaura"
+date: "2/4/2022"
+output: html_document
+---
+
+```{r}
+library(readr)
+df <- read_csv("C:/Users/user/Downloads/Supermarket_Dataset_1 - Sales Data.csv")
+head(df, 5)
+
+```
+
+
+```{r}
+dim(df)
+
+```
+
+```{r}
+str(df)
+
+```
+
+```{r}
+
+sum(is.na(df))
+
+```
+
+```{r}
+# Renaming columns
+names(df)[names(df) == "gross income"] <- "gross_income"
+names(df)[names(df) == "Unit price"] <- "unit_price"
+names(df)[names(df) == "gross margin percentage"] <- "gross_margin_%"
+
+
+df
+
+```
+
+```{r}
+colnames(df)
+
+```
+
+```{r}
+#install.packages("dplyr")                           
+library("dplyr")
+
+```
+
+```{r}
+ # Subset numeric columns with dplyr
+df1<- select_if(df, is.numeric)            
+df1   
+
+```
+
+```{r}
+
+# select columns
+df2 <- subset(df1, select = c("unit_price", "Quantity", "Tax", "cogs", "gross_income", "Rating", "Total"))
+colnames(df2)
+```
+
+## Feature selection filter method
+```{r}
+# Installing and loading our caret package
+# ---
+# 
+suppressWarnings(
+        suppressMessages(if
+                         (!require(caret, quietly=TRUE))
+                install.packages("caret")))
+library(caret)
+
+```
+
+```{r}
+# Installing and loading the corrplot package for plotting
+# ---
+# 
+suppressWarnings(
+        suppressMessages(if
+                         (!require(corrplot, quietly=TRUE))
+                install.packages("corrplot")))
+library(corrplot)
+
+```
+
+```{r}
+# Calculating the correlation matrix
+# ---
+#
+correlationMatrix <- cor(df2)
+```
+
+```{r}
+# Checking for columns with zero variance
+
+apply(df2, 2, var)
+
+```
+
+```{r}
+
+# find which variables have zero variance
+which(apply(df2, 2, var) == 0)
+
+```
+
+```{r}
+# columns without variance we get rid of.
+
+#df1 <- df1[ - as.numeric(which(apply(df1, 2, var) == 0))]
+#str(df1)
+```
+
+```{r}
+# Find attributes that are highly correlated
+# ---
+#
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+
+```
+
+```{r}
+# Highly correlated attributes
+
+# 
+highlyCorrelated
+names(df2[,highlyCorrelated])
+```
+
+```{r}
+# Removing Redundant Features 
+
+df3<-df2[-highlyCorrelated]
+
+```
+
+
+```{r}
+# Performing our graphical comparison
+par(mfrow = c(1, 2))
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(df2), order = "hclust")
+
+```
+
