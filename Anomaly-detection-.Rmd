@@ -1,0 +1,89 @@
+---
+title: "Anomaly Detection"
+author: "Karen Mwaura"
+date: "2/4/2022"
+output: html_document
+---
+
+```{r}
+#install.packages("timetk")
+
+```
+
+## Load Libraries 
+```{r}
+# Load tidyverse and anomalize
+
+library(tidyverse)
+library(anomalize)
+library(tibbletime)
+library(timetk)
+
+```
+
+## Reading data 
+```{r}
+#Read the data
+
+df<- read.csv("C:/Users/user/Downloads/Supermarket_Sales_Forecasting - Sales.csv")
+head(df, 5)
+
+```
+
+```{r}
+str(df)
+
+```
+
+
+```{r}
+df$Date <- as.Date(Sys.Date() + 1:nrow(df))
+
+df %>% 
+  as_tibble() %>%
+  time_decompose(Sales) %>%
+  anomalize(remainder) %>%
+  time_recompose() %>%
+  filter(anomaly == 'Yes')
+
+```
+
+## Visual of anomalies detected
+```{r}
+df %>% 
+  as_tibble() %>%
+  time_decompose(Sales) %>%
+  anomalize(remainder) %>%
+  plot_anomaly_decomposition() 
+
+```
+
+## Anomaly Detection
+```{r}
+df_anomalized <- df %>%
+  as.tibble()%>%
+    time_decompose(Date, merge = TRUE) %>%
+    anomalize(remainder) %>%
+    time_recompose()
+df_anomalized %>% glimpse()
+
+```
+
+### Visualizing anomalies
+```{r}
+df_anomalized %>% plot_anomalies(ncol = 5, alpha_dots = 0.2)
+
+```
+
+### Interactive graphical anomaly representation 
+```{r}
+df %>% timetk::plot_anomaly_diagnostics(Date,Sales, .facet_ncol = 2)
+
+```
+
+### To find the exact points that are anomalies
+```{r}
+df %>% timetk::tk_anomaly_diagnostics(Date, Sales) %>% filter(anomaly=='Yes')
+
+```
+

@@ -1,0 +1,177 @@
+---
+title: "Associative Analysis-"
+author: "Karen Mwaura"
+date: "2/4/2022"
+output: html_document
+---
+
+
+```{r}
+# Loading the arules library
+#
+library(arules)
+
+```
+
+
+```{r}
+library(readr)
+df<- read_csv("C:/Users/user/Downloads/Supermarket_Sales_Dataset II.csv")
+head(df, 5)
+
+```
+
+```{r}
+# Loading our transactions dataset from our csv file
+path <- "C:/Users/user/Downloads/Supermarket_Sales_Dataset II.csv"
+
+Transactions<-read.transactions(path, sep = ",")
+Transactions
+
+
+```
+
+
+```{r}
+# Verifying the object's class
+
+class(Transactions)
+
+```
+
+```{r}
+# Previewing our first 5 transactions
+
+inspect(Transactions[1:5])
+
+```
+
+```{r}
+# If we wanted to preview the items that make up our dataset,
+# alternatively we can do the following..
+
+items<-as.data.frame(itemLabels(Transactions))
+colnames(items) <- "Item"
+head(items, 10)    
+
+```
+
+
+```{r}
+#Get summary of the transaction dataset
+# This would give us some information such as the most purchased items
+
+summary(Transactions)
+
+```
+
+```{r}
+# Exploring the frequency of some articles 
+
+itemFrequency(Transactions[, 8:10],type = "absolute")
+round(itemFrequency(Transactions[, 8:10],type = "relative")*100,2)
+
+```
+
+```{r}
+# Displaying top 10 most common items in the transactions dataset 
+# and the items whose relative importance is at least 10%
+
+par(mfrow = c(1, 2))
+
+```
+
+```{r}
+
+# plot the frequency of items
+itemFrequencyPlot(Transactions, topN = 10,col="purple")
+itemFrequencyPlot(Transactions, support = 0.1,col="sky blue")
+```
+
+```{r}
+# Building a model based on association rules using the apriori function
+
+rules <- apriori (Transactions, parameter = list(supp = 0.001, conf = 0.8))
+rules
+
+```
+
+```{r}
+# Building a apriori model with Min Support as 0.002 and confidence as 0.8.
+
+rules2 <- apriori (Transactions,parameter = list(supp = 0.002, conf = 0.8)) 
+
+```
+
+
+```{r}
+# Building apriori model with Min Support as 0.002 and confidence as 0.6.
+
+rules3 <- apriori (Transactions, parameter = list(supp = 0.002, conf = 0.6)) 
+
+```
+
+There's an increase in the minimum support of 0.001 to 0.002 and model rules went from 74 to 2. This means that, a high level of support can make teh model lose interesting rules. The other part there was a decrease in the minimum confidence to 0.6 and the model rules went from 2 to 43. This means, loew confidence level will increase teh number of rules of which many may not be useful.
+
+```{r}
+# perform an exploration of our model 
+
+summary(rules)
+
+```
+
+```{r}
+# Observing rules built in our model 
+
+inspect(rules[1:5])
+
+```
+
+If one buys frozen smoothie with spinach, they are 89% likely to buy mineral water.
+If a person buys bacon and pancakes, they're 81% likely to buy spaghetti.
+If one buys turkey and nonfat milk, they're 81% likely to get mineral water.
+If one gets groundbeef and nonfat milk, they have 85% chance of buying mineral water.
+If one buys mushroom cream sauce and pasta, they are 95% likely to buy escalope.
+
+```{r}
+# Ordering these rules by a criteria such as the level of confidence then looking at the first five rules.
+
+rules<-sort(rules, by="confidence", decreasing=TRUE)
+inspect(rules[1:5])
+
+```
+
+The first four rules have a confidence of 100 and the last oen has 95.
+
+```{r}
+# If we wanted to make a promotion relating to sale of milk,then create a subset of rules in regards to these products 
+# This would tell us the items that the customers bought before purchasing milk.
+
+milk <- subset(rules, subset = rhs %pin% "milk")
+
+# Then order by confidence
+milk<-sort(milk, by="confidence", decreasing=TRUE)
+milk
+
+inspect(milk[1:5])
+
+```
+
+```{r}
+# We want to determine items that customers might buy who have previously bought milk
+
+# Subset the rules
+milk <- subset(rules, subset = lhs %pin% "milk")
+
+# Order by confidence
+milk<-sort(milk, by="confidence", decreasing=TRUE)
+
+# inspect top 5
+inspect(milk[5:15])
+
+```
+
+
+
+
+
