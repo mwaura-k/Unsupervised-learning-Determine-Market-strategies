@@ -1,0 +1,120 @@
+---
+title: "PCA"
+author: "Karen Mwaura"
+date: "2/4/2022"
+output: html_document
+---
+
+You are a Data analyst at Carrefour Kenya and are currently undertaking a project that will inform the marketing department on the most relevant marketing strategies that will result in the highest no. of sales (total price including tax). Your project has been divided into four parts where you'll explore a recent marketing dataset by performing various unsupervised learning techniques and later providing recommendations based on your insights.
+
+```{r}
+#Read data
+
+library(readr)
+df <- read_csv("C:/Users/user/Downloads/Supermarket_Dataset_1 - Sales Data.csv")
+head(df,5)
+
+```
+
+
+```{r}
+# Check for the shape
+dim(df)
+
+```
+
+```{r}
+#Check for dtypes
+sapply(df, class)
+
+```
+
+```{r}
+#Check for missing values
+colSums(is.na(df))
+
+```
+
+```{r}
+#Check for duplicates
+duplicated_rows <- df[duplicated(df),]
+duplicated_rows 
+
+```
+
+```{r}
+#Statistical summary
+summary(df)
+
+```
+
+```{r}
+# Get the numeric columns
+
+#df1 <- df %>% select_if(is.numeric)
+#colnames(df1)
+
+```
+
+```{r}
+# Renaming columns
+names(df)[names(df) == "Unit price"] <- "Unit_price"
+names(df)[names(df) == "gross margin percentage"] <- "gross_margin_%"
+names(df)[names(df) == "gross income"] <- "gross_income"
+
+df
+
+```
+
+```{r}
+# selecting needed columns
+df1 <- subset(df, select = c("Unit_price", "gross_margin_%", "Quantity", "Tax", "cogs","gross_income", "Rating", "Total"))
+colnames(df1)
+
+```
+
+```{r}
+summary(df1)
+
+```
+
+```{r}
+#principal component analysis
+
+# We then pass df to the prcomp().
+df2 <- prcomp(df1)
+
+```
+
+```{r}
+summary(df2)
+
+```
+
+We obtained 8 principal components, each which explain a percentate of the total variation of the dataset.
+
+```{r}
+
+# Installing our ggbiplot visualisation package
+# 
+#install.packages("devtools") 
+
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
+library(devtools)
+#install_github("vqv/ggbiplot")
+
+# We will now plot our pca
+# Loading our ggbiplot library
+#  
+library(ggbiplot)
+
+```
+
+```{r}
+
+ggbiplot(df2)
+
+```
+
+
+
